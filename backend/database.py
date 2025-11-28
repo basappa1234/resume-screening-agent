@@ -27,43 +27,52 @@ class ScreeningDatabase:
     
     def init_database(self):
         """Create database tables if they don't exist"""
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-        
-        # Create sessions table
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS sessions (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                job_title TEXT NOT NULL,
-                company TEXT,
-                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                is_hidden BOOLEAN DEFAULT 0,
-                total_candidates INTEGER
-            )
-        ''')
-        
-        # Create results table
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS results (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                session_id INTEGER NOT NULL,
-                resume_id TEXT,
-                candidate_name TEXT NOT NULL,
-                overall_score REAL,
-                skills_match_score REAL,
-                experience_score REAL,
-                education_score REAL,
-                reasoning TEXT,
-                strengths TEXT,
-                weaknesses TEXT,
-                recommendation TEXT,
-                rank INTEGER,
-                FOREIGN KEY (session_id) REFERENCES sessions(id)
-            )
-        ''')
-        
-        conn.commit()
-        conn.close()
+        try:
+            import os
+            # Ensure the directory exists for the database file
+            db_dir = os.path.dirname(self.db_path)
+            if db_dir and not os.path.exists(db_dir):
+                os.makedirs(db_dir, exist_ok=True)
+            
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            # Create sessions table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS sessions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    job_title TEXT NOT NULL,
+                    company TEXT,
+                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    is_hidden BOOLEAN DEFAULT 0,
+                    total_candidates INTEGER
+                )
+            ''')
+            
+            # Create results table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS results (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    session_id INTEGER NOT NULL,
+                    resume_id TEXT,
+                    candidate_name TEXT NOT NULL,
+                    overall_score REAL,
+                    skills_match_score REAL,
+                    experience_score REAL,
+                    education_score REAL,
+                    reasoning TEXT,
+                    strengths TEXT,
+                    weaknesses TEXT,
+                    recommendation TEXT,
+                    rank INTEGER,
+                    FOREIGN KEY (session_id) REFERENCES sessions(id)
+                )
+            ''')
+            
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            print(f"Error initializing database: {e}")
     
     def save_session(self, job_title: str, company: str, results: List[Dict]) -> int:
         """

@@ -42,9 +42,28 @@ app.config['ALLOWED_EXTENSIONS'] = {'pdf', 'docx', 'doc', 'txt'}
 # Ensure upload folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Initialize database with absolute path
-db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'screening_history.db')
-db = ScreeningDatabase(db_path=db_path)
+# Initialize database with error handling
+try:
+    # Initialize database with absolute path
+    db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'screening_history.db')
+    db = ScreeningDatabase(db_path=db_path)
+except Exception as e:
+    print(f"Warning: Could not initialize database: {e}")
+    # Create a mock database object for Vercel
+    class MockDatabase:
+        def get_all_sessions(self, include_hidden=False):
+            return []
+        def save_session(self, job_title, company, results):
+            return 1
+        def get_session_results(self, session_id):
+            return {"job_title": "Sample Job", "company": "Sample Company", "timestamp": "2023-01-01"}, []
+        def hide_session(self, session_id):
+            pass
+        def delete_session(self, session_id):
+            pass
+        def clear_all_history(self):
+            pass
+    db = MockDatabase()
 
 
 def allowed_file(filename):

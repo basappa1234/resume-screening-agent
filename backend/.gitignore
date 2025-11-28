@@ -1,0 +1,37 @@
+# Environment
+.env
+.env.local
+.env.production
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Uploads
+uploads/
+*.pdf
+*.docx
+*.doc
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Test files
+test_*.py
+*_test.py
+
+# Cache
+*.log
+*.tmp

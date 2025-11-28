@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Screening Agent - AI-Powered Resume Analysis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div style="text-align: center; margin-bottom: 30px; padding: 20px;">
+        <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 15px; letter-spacing: -1px; color: #ffffff; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+            <span style="background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                🎯 Resume Screening Agent
+            </span>
+        </h1>
+        <p style="font-size: 1.2rem; color: #ffffff; font-weight: 400; max-width: 600px; margin: 0 auto; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
+            AI-Powered Resume Analysis for efficient hiring
+        </p>
+    </div>
+    
+    <div class="container">
+
+        {% if error %}
+        <div class="alert alert-error">
+            <strong>❌ Error:</strong> {{ error }}
+        </div>
+        {% endif %}
+
+        <div class="upload-section">
+            <h2>📄 Submit Job Description & Resumes</h2>
+            <form method="POST" enctype="multipart/form-data" action="/upload">
+                
+                <!-- Job Description Text Area -->
+                <div class="form-group">
+                    <label for="job_description_text">
+                        <span class="label-icon">📋</span>
+                        Job Description
+                    </label>
+                    <p class="help-text">Paste the job description text below or upload a file</p>
+                    <textarea id="job_description_text" 
+                              name="job_description_text" 
+                              rows="10" 
+                              placeholder="Paste job description here...\n\nExample:\nJob Title: Data Science Engineer\nExperience: 3-8 years\nRole Overview: ...\n\nKey Responsibilities: ..."></textarea>
+                    
+                    <p class="help-text" style="margin-top: 15px;">Or upload a file (PDF, DOCX, or TXT)</p>
+                    <div class="file-input-wrapper">
+                        <input type="file" 
+                               id="job_description" 
+                               name="job_description" 
+                               accept=".pdf,.docx,.doc,.txt">
+                        <span class="file-name" id="job-file-name">No file chosen (optional)</span>
+                    </div>
+                </div>
+
+                <!-- Resume Upload (Multiple) -->
+                <div class="form-group">
+                    <label for="resumes">
+                        <span class="label-icon">📁</span>
+                        Resumes
+                    </label>
+                    <p class="help-text">Upload one or more resume files (PDF, DOCX, or TXT)</p>
+                    <div class="file-input-wrapper">
+                        <input type="file" 
+                               id="resumes" 
+                               name="resumes" 
+                               accept=".pdf,.docx,.doc,.txt"
+                               multiple
+                               required>
+                        <span class="file-name" id="resume-file-name">No files chosen</span>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <span class="btn-icon">🚀</span>
+                        Analyze Resumes
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="info-section">
+            <h3>ℹ️ How It Works</h3>
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-number">1</div>
+                    <h4>Provide Job Details</h4>
+                    <p>Paste job description text or upload a file</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-number">2</div>
+                    <h4>Upload Resumes</h4>
+                    <p>Upload candidate resume files for analysis</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-number">3</div>
+                    <h4>Get AI Analysis</h4>
+                    <p>Receive detailed scores, rankings, and recommendations</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="features-section">
+            <h3>✨ Features</h3>
+            <ul class="features-list">
+                <li>📊 Comprehensive scoring on skills, experience, and education</li>
+                <li>🏆 Automatic ranking from best to least fit candidates</li>
+                <li>💡 Detailed analysis with strengths and weaknesses</li>
+                <li>🎯 Hiring recommendations for each candidate</li>
+                <li>📁 Support for PDF, DOCX, and TXT file formats</li>
+                <li>🤖 Powered by advanced AI language models</li>
+            </ul>
+        </div>
+
+        <div class="history-link-section">
+            <h3>📚 View Your Screening History</h3>
+            <p>Access your previous resume screenings, export results, and manage your analysis history</p>
+            <a href="/history" class="btn btn-primary">
+                <span class="btn-icon">📚</span>
+                View History
+            </a>
+        </div>
+
+        <footer>
+            <p>Powered by <strong>Basappa Vajramatti</strong> | Built with ❤️ for efficient hiring</p>
+        </footer>
+    </div>
+
+    <script>
+        // Show selected file names
+        document.getElementById('job_description').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name || 'No file chosen';
+            document.getElementById('job-file-name').textContent = fileName;
+        });
+
+        document.getElementById('resumes').addEventListener('change', function(e) {
+            const fileCount = e.target.files.length;
+            const fileName = fileCount === 1 
+                ? e.target.files[0].name 
+                : `${fileCount} files selected`;
+            document.getElementById('resume-file-name').textContent = fileName;
+        });
+    </script>
+</body>
+</html>

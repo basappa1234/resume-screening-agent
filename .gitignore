@@ -1,0 +1,39 @@
+# Environment
+.env
+.env.local
+.env.production
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Output
+results/
+*.json
+*.log
+*.tmp
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploads
+uploads/
+
+# Test files
+test_*.py
+*_test.py
+
+# Sample data
+sample_data.py

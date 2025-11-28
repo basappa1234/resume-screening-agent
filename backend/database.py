@@ -72,7 +72,10 @@ class ScreeningDatabase:
             conn.commit()
             conn.close()
         except Exception as e:
-            print(f"Error initializing database: {e}")
+            # In Vercel environment, we'll use in-memory storage instead
+            if not os.environ.get('VERCEL'):
+                print(f"Error initializing database: {e}")
+                raise e  # Re-raise for non-Vercel environments
     
     def save_session(self, job_title: str, company: str, results: List[Dict]) -> int:
         """

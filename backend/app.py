@@ -42,28 +42,95 @@ app.config['ALLOWED_EXTENSIONS'] = {'pdf', 'docx', 'doc', 'txt'}
 # Ensure upload folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Initialize database with error handling
-try:
-    # Initialize database with absolute path
-    db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'screening_history.db')
-    db = ScreeningDatabase(db_path=db_path)
-except Exception as e:
-    print(f"Warning: Could not initialize database: {e}")
-    # Create a mock database object for Vercel
-    class MockDatabase:
+# For Vercel deployment, use in-memory database or disable persistence
+if os.environ.get('VERCEL'):
+    # Use a simple in-memory storage for sessions/results
+    class InMemoryDatabase:
+        def __init__(self):
+            self.sessions = {}
+            self.results = {}
+            self.session_counter = 1
+            self.result_counter = 1
+        
         def get_all_sessions(self, include_hidden=False):
-            return []
+            return list(self.sessions.values())
+        
         def save_session(self, job_title, company, results):
-            return 1
+            session_id = self.session_counter
+            self.sessions[session_id] = {
+                'id': session_id,
+                'job_title': job_title,
+                'company': company,
+                'timestamp': datetime.now().isoformat(),
+                'is_hidden': False,
+                'total_candidates': len(results)
+            }
+            
+            # Save results
+            for rank, result in enumerate(results, 1):
+                result_id = self.result_counter
+                self.results[result_id] = {
+                    'id': result_id,
+                    'session_id': session_id,
+                    'resume_id': result.get('resume_id'),
+                    'candidate_name': result.get('candidate_name'),
+                    'overall_score': result.get('overall_score'),
+                    'skills_match_score': result.get('skills_match_score'),
+                    'experience_score': result.get('experience_score'),
+                    'education_score': result.get('education_score'),
+                    'reasoning': result.get('reasoning'),
+                    'strengths': result.get('strengths', []),
+                    'weaknesses': result.get('weaknesses', []),
+                    'recommendation': result.get('recommendation'),
+                    'rank': rank
+                }
+                self.result_counter += 1
+            
+            self.session_counter += 1
+            return session_id
+        
         def get_session_results(self, session_id):
-            return {"job_title": "Sample Job", "company": "Sample Company", "timestamp": "2023-01-01"}, []
+            session = self.sessions.get(session_id, {})
+            results = [r for r in self.results.values() if r['session_id'] == session_id]
+            return session, results
+        
         def hide_session(self, session_id):
-            pass
+            if session_id in self.sessions:
+                self.sessions[session_id]['is_hidden'] = True
+        
         def delete_session(self, session_id):
-            pass
+            if session_id in self.sessions:
+                del self.sessions[session_id]
+                # Remove associated results
+                self.results = {k: v for k, v in self.results.items() if v['session_id'] != session_id}
+        
         def clear_all_history(self):
-            pass
-    db = MockDatabase()
+            self.sessions = {}
+            self.results = {}
+    
+    db = InMemoryDatabase()
+else:
+    # Initialize database with absolute path for local development
+    try:
+        db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'screening_history.db')
+        db = ScreeningDatabase(db_path=db_path)
+    except Exception as e:
+        print(f"Warning: Could not initialize database: {e}")
+        # Create a mock database object
+        class MockDatabase:
+            def get_all_sessions(self, include_hidden=False):
+                return []
+            def save_session(self, job_title, company, results):
+                return 1
+            def get_session_results(self, session_id):
+                return {"job_title": "Sample Job", "company": "Sample Company", "timestamp": "2023-01-01"}, []
+            def hide_session(self, session_id):
+                pass
+            def delete_session(self, session_id):
+                pass
+            def clear_all_history(self):
+                pass
+        db = MockDatabase()
 
 
 def allowed_file(filename):

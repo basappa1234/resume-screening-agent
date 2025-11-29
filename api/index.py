@@ -8,10 +8,12 @@ sys.path.insert(0, backend_path)
 
 # Import the Flask app with error handling
 try:
-    from app import app
+    from backend.app import app
     application = app
 except Exception as e:
     print(f"Error importing app: {e}")
+    import traceback
+    traceback.print_exc()
     # Create a simple fallback app
     from flask import Flask
     app = Flask(__name__)

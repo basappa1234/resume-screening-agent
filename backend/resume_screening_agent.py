@@ -1,8 +1,8 @@
 """
 Resume Screening Agent
 Uses Groq API to rank resumes based on job descriptions
+Now with vector database retrieval for efficiency
 """
-
 import os
 import json
 from typing import List, Dict, Optional
@@ -11,7 +11,7 @@ from groq import Groq
 from dotenv import load_dotenv
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import Lock
-
+from vector_db import ResumeRetriever  # Import our new vector database
 
 @dataclass
 class Resume:
@@ -25,7 +25,6 @@ class Resume:
     education: List[Dict[str, str]]
     summary: str
 
-
 @dataclass
 class JobDescription:
     """Job Description data structure"""
@@ -37,7 +36,6 @@ class JobDescription:
     responsibilities: List[str]
     qualifications: List[str]
     description: str
-
 
 @dataclass
 class ResumeScore:
@@ -52,10 +50,10 @@ class ResumeScore:
     strengths: List[str]
     weaknesses: List[str]
     recommendation: str
-
+    similarity_score: float = 0.0  # Add similarity score from vector DB
 
 class ResumeScreeningAgent:
-    """AI-powered Resume Screening Agent using Groq API"""
+    """AI-powered Resume Screening Agent using Groq API with vector database retrieval"""
     
     def __init__(self, api_key: Optional[str] = None, model: str = "llama-3.1-8b-instant"):
         """
@@ -73,6 +71,7 @@ class ResumeScreeningAgent:
         
         self.client = Groq(api_key=self.api_key)
         self.model = model
+        self.retriever = ResumeRetriever()  # Initialize our retriever
     
     def _create_screening_prompt(self, resume: Resume, job_desc: JobDescription) -> str:
         """Create a detailed prompt for resume screening"""
@@ -189,70 +188,97 @@ Be thorough, fair, and objective in your analysis. Return ONLY valid JSON."""
         """
         prompt = self._create_screening_prompt(resume, job_desc)
         
-        try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are an expert recruiter. Analyze resumes objectively and return valid JSON responses only."
-                    },
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ],
-                temperature=0.3,
-                max_tokens=2000
-            )
-            
-            result_text = response.choices[0].message.content.strip()
-            
-            # Extract JSON from response (handle potential markdown code blocks)
-            if "```json" in result_text:
-                result_text = result_text.split("```json")[1].split("```")[0].strip()
-            elif "```" in result_text:
-                result_text = result_text.split("```")[1].split("```")[0].strip()
-            
-            result = json.loads(result_text)
-            
-            return ResumeScore(
-                resume_id=resume.id,
-                candidate_name=resume.name,
-                overall_score=float(result.get("overall_score", 0)),
-                skills_match_score=float(result.get("skills_match_score", 0)),
-                experience_score=float(result.get("experience_score", 0)),
-                education_score=float(result.get("education_score", 0)),
-                reasoning=result.get("reasoning", ""),
-                strengths=result.get("strengths", []),
-                weaknesses=result.get("weaknesses", []),
-                recommendation=result.get("recommendation", "NOT_RECOMMENDED")
-            )
-            
-        except Exception as e:
-            print(f"Error screening resume {resume.id}: {str(e)}")
-            # Return a default low score on error
-            return ResumeScore(
-                resume_id=resume.id,
-                candidate_name=resume.name,
-                overall_score=0.0,
-                skills_match_score=0.0,
-                experience_score=0.0,
-                education_score=0.0,
-                reasoning=f"Error during screening: {str(e)}",
-                strengths=[],
-                weaknesses=["Error during automated screening"],
-                recommendation="NOT_RECOMMENDED"
-            )
-    
-    def rank_resumes(self, resumes: List[Resume], job_desc: JobDescription, max_workers: int = 5) -> List[ResumeScore]:
+        # Try up to 3 times with exponential backoff for rate limiting
+        for attempt in range(3):
+            try:
+                response = self.client.chat.completions.create(
+                    model=self.model,
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": "You are an expert recruiter. Analyze resumes objectively and return valid JSON responses only."
+                        },
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ],
+                    temperature=0.3,
+                    max_tokens=2000
+                )
+                
+                result_text = response.choices[0].message.content.strip()
+                
+                # Extract JSON from response (handle potential markdown code blocks)
+                if "```json" in result_text:
+                    result_text = result_text.split("```json")[1].split("```")[0].strip()
+                elif "```" in result_text:
+                    result_text = result_text.split("```")[1].split("```")[0].strip()
+                
+                result = json.loads(result_text)
+                
+                return ResumeScore(
+                    resume_id=resume.id,
+                    candidate_name=resume.name,
+                    overall_score=float(result.get("overall_score", 0)),
+                    skills_match_score=float(result.get("skills_match_score", 0)),
+                    experience_score=float(result.get("experience_score", 0)),
+                    education_score=float(result.get("education_score", 0)),
+                    reasoning=result.get("reasoning", ""),
+                    strengths=result.get("strengths", []),
+                    weaknesses=result.get("weaknesses", []),
+                    recommendation=result.get("recommendation", "NOT_RECOMMENDED")
+                )
+                
+            except Exception as e:
+                # Check if it's a rate limit error
+                if "rate_limit_exceeded" in str(e) and attempt < 2:
+                    # Wait before retrying (exponential backoff)
+                    import time
+                    wait_time = (2 ** attempt) * 5  # 5s, 10s, 20s
+                    print(f"Rate limit hit for {resume.name}. Waiting {wait_time}s before retry...")
+                    time.sleep(wait_time)
+                    continue
+                else:
+                    print(f"Error screening resume {resume.id}: {str(e)}")
+                    # Return a default low score on error
+                    return ResumeScore(
+                        resume_id=resume.id,
+                        candidate_name=resume.name,
+                        overall_score=0.0,
+                        skills_match_score=0.0,
+                        experience_score=0.0,
+                        education_score=0.0,
+                        reasoning=f"Error during screening: {str(e)}",
+                        strengths=[],
+                        weaknesses=["Error during automated screening"],
+                        recommendation="NOT_RECOMMENDED"
+                    )
+        
+        # This should never be reached, but just in case
+        return ResumeScore(
+            resume_id=resume.id,
+            candidate_name=resume.name,
+            overall_score=0.0,
+            skills_match_score=0.0,
+            experience_score=0.0,
+            education_score=0.0,
+            reasoning="Max retries exceeded",
+            strengths=[],
+            weaknesses=["Max retries exceeded"],
+            recommendation="NOT_RECOMMENDED"
+        )
+
+    def rank_resumes(self, resumes: List[Resume], job_desc: JobDescription, max_workers: int = 2, use_retrieval: bool = True, retrieval_k: int = 100) -> List[ResumeScore]:
         """
-        Screen and rank multiple resumes using parallel processing
+        Screen and rank multiple resumes using parallel processing with optional hybrid search retrieval
         
         Args:
             resumes: List of Resume objects to screen
             job_desc: Job description to match against
-            max_workers: Maximum number of parallel workers (default: 5)
+            max_workers: Maximum number of parallel workers (default: 2 to avoid rate limits)
+            use_retrieval: Whether to use hybrid search retrieval (default: True)
+            retrieval_k: Number of top candidates to retrieve (default: 100)
             
         Returns:
             List of ResumeScore objects, sorted by overall_score (highest first)
@@ -260,14 +286,78 @@ Be thorough, fair, and objective in your analysis. Return ONLY valid JSON."""
         print(f"Screening {len(resumes)} resumes for: {job_desc.title}")
         print("=" * 60)
         
+        # Use hybrid search retrieval if enabled
+        if use_retrieval:
+            print(f"Using hybrid search to select top {retrieval_k} candidates from {len(resumes)}...")
+            
+            # Convert Resume objects to dictionaries for indexing
+            resume_dicts = []
+            resume_id_map = {}  # Map from indexed IDs to original Resume objects
+            for i, resume in enumerate(resumes):
+                resume_dict = {
+                    'id': resume.id,  # Use original ID
+                    'name': resume.name,
+                    'email': resume.email,
+                    'phone': resume.phone,
+                    'skills': resume.skills,
+                    'experience': resume.experience,
+                    'education': resume.education,
+                    'summary': resume.summary
+                }
+                resume_dicts.append(resume_dict)
+                resume_id_map[resume.id] = resume  # Map ID to original object
+            
+            # Index all resumes and job description
+            self.retriever.index_resumes(resume_dicts)
+            job_id = self.retriever.index_job_description({
+                'title': job_desc.title,
+                'company': job_desc.company,
+                'required_skills': job_desc.required_skills,
+                'preferred_skills': job_desc.preferred_skills,
+                'experience_years': job_desc.experience_years,
+                'responsibilities': job_desc.responsibilities,
+                'qualifications': job_desc.qualifications,
+                'description': job_desc.description
+            })
+            
+            # Retrieve top candidates using hybrid search
+            top_candidates = self.retriever.retrieve_candidates({
+                'title': job_desc.title,
+                'company': job_desc.company,
+                'required_skills': job_desc.required_skills,
+                'preferred_skills': job_desc.preferred_skills,
+                'experience_years': job_desc.experience_years,
+                'responsibilities': job_desc.responsibilities,
+                'qualifications': job_desc.qualifications,
+                'description': job_desc.description
+            }, retrieval_k)
+            
+            # Convert back to Resume objects using the ID map
+            filtered_resumes = []
+            for candidate in top_candidates:
+                candidate_id = candidate['id']
+                if candidate_id in resume_id_map:
+                    filtered_resumes.append(resume_id_map[candidate_id])
+                else:
+                    # Fallback: try to find by name if ID doesn't match
+                    for original_resume in resumes:
+                        if original_resume.name == candidate.get('name'):
+                            filtered_resumes.append(original_resume)
+                            break
+            
+            print(f"Selected {len(filtered_resumes)} candidates for detailed LLM screening")
+            resumes_to_process = filtered_resumes
+        else:
+            resumes_to_process = resumes
+        
         scores = []
         
-        # Use ThreadPoolExecutor for parallel processing
+        # Use ThreadPoolExecutor for parallel processing with fewer workers to avoid rate limits
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             # Submit all tasks
             future_to_resume = {
                 executor.submit(self.screen_resume, resume, job_desc): resume 
-                for resume in resumes
+                for resume in resumes_to_process
             }
             
             # Collect results as they complete
@@ -275,10 +365,13 @@ Be thorough, fair, and objective in your analysis. Return ONLY valid JSON."""
                 resume = future_to_resume[future]
                 try:
                     score = future.result()
+                    # Add hybrid score if available
+                    if hasattr(resume, 'hybrid_score'):
+                        score.similarity_score = getattr(resume, 'hybrid_score', 0.0)
                     scores.append(score)
-                    print(f"[{i}/{len(resumes)}] Completed screening for {resume.name} (Score: {score.overall_score:.1f})")
+                    print(f"[{i}/{len(resumes_to_process)}] Completed screening for {resume.name} (Score: {score.overall_score:.1f})")
                 except Exception as e:
-                    print(f"[{i}/{len(resumes)}] Error screening {resume.name}: {str(e)}")
+                    print(f"[{i}/{len(resumes_to_process)}] Error screening {resume.name}: {str(e)}")
                     # Create a default low score for failed resumes
                     default_score = ResumeScore(
                         resume_id=resume.id,

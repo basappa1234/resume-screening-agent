@@ -3,147 +3,666 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resume Screening Agent - AI-Powered Resume Analysis</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title> AI Resume Screening Agent</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            position: relative;
+            z-index: 1;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: white;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            margin-bottom: 15px;
+        }
+
+        .header p {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 300;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 40px rgba(255, 255, 255, 0.1);
+            animation: fadeInUp 0.8s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .card:hover {
+            transform: translateY(-15px) !important;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4), 0 0 60px rgba(255, 215, 0, 0.3);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ee7752, #e73c7e, #23a6d5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.3); }
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            resize: vertical;
+        }
+
+        .form-group textarea:focus,
+        .form-group input[type="file"]:focus,
+        .form-group input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group input[type="file"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px dashed #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f9f9f9;
+        }
+
+        .form-group input[type="file"]:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .form-group input[type="number"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 8px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            padding: 16px 40px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ee7752 0%, #e73c7e 50%, #23a6d5 100%);
+            background-size: 200% 200%;
+            animation: gradientSlide 3s ease infinite;
+            color: white;
+            width: 100%;
+            justify-content: center;
+        }
+
+        @keyframes gradientSlide {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(238, 119, 82, 0.5), 0 0 30px rgba(231, 60, 126, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #23d5ab 0%, #23a6d5 50%, #ee7752 100%);
+            background-size: 200% 200%;
+            animation: gradientSlide 3s ease infinite;
+            color: white;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(35, 213, 171, 0.5), 0 0 30px rgba(35, 166, 213, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #e73c7e 0%, #ee7752 50%, #23d5ab 100%);
+            background-size: 200% 200%;
+            animation: gradientSlide 3s ease infinite;
+            color: white;
+            padding: 12px 30px;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(231, 60, 126, 0.5), 0 0 30px rgba(238, 119, 82, 0.4);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(102, 126, 234, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ee7752, #e73c7e, #23a6d5, #23d5ab, #ee7752);
+            background-size: 300% 100%;
+            animation: progress 2.5s linear infinite;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(238, 119, 82, 0.6);
+        }
+
+        @keyframes progress {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        #processingStatus {
+            text-align: center;
+            background: linear-gradient(135deg, #ee7752, #e73c7e, #23a6d5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-top: 15px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+
+        .feature-box {
+            text-align: center;
+            padding: 30px;
+            border-radius: 16px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .feature-box:hover::before {
+            left: 100%;
+        }
+
+        .feature-box:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+        }
+
+        .feature-box h3 {
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+        }
+
+        .feature-box p {
+            color: #555;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .feature-1 { 
+            background: linear-gradient(135deg, rgba(238, 119, 82, 0.2), rgba(238, 119, 82, 0.05));
+            border: 2px solid rgba(238, 119, 82, 0.3);
+        }
+        .feature-2 { 
+            background: linear-gradient(135deg, rgba(35, 213, 171, 0.2), rgba(35, 213, 171, 0.05));
+            border: 2px solid rgba(35, 213, 171, 0.3);
+        }
+        .feature-3 { 
+            background: linear-gradient(135deg, rgba(35, 166, 213, 0.2), rgba(35, 166, 213, 0.05));
+            border: 2px solid rgba(35, 166, 213, 0.3);
+        }
+
+        .feature-1 h3 { color: #ee7752; }
+        .feature-2 h3 { color: #23d5ab; }
+        .feature-3 h3 { color: #23a6d5; }
+
+        .mini-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .mini-feature {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .mini-feature:hover {
+            transform: translateX(8px);
+            border-color: currentColor;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .mini-feature span:first-child {
+            font-size: 2rem;
+            margin-right: 15px;
+        }
+
+        .mini-feature span:last-child {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .mini-feature-1 { background: linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(236, 72, 153, 0.05)); }
+        .mini-feature-2 { background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(56, 189, 248, 0.05)); }
+        .mini-feature-3 { background: linear-gradient(135deg, rgba(163, 163, 163, 0.15), rgba(163, 163, 163, 0.05)); }
+        .mini-feature-4 { background: linear-gradient(135deg, rgba(248, 113, 113, 0.15), rgba(248, 113, 113, 0.05)); }
+
+        .history-link-section {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .history-link-section h3 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .header p {
+                font-size: 1.1rem;
+            }
+            
+            .card {
+                padding: 25px;
+            }
+            
+            .features-grid,
+            .mini-features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div style="text-align: center; margin-bottom: 30px; padding: 20px;">
-        <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 15px; letter-spacing: -1px; color: #ffffff; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
-            <span style="background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                🎯 Resume Screening Agent
-            </span>
-        </h1>
-        <p style="font-size: 1.2rem; color: #ffffff; font-weight: 400; max-width: 600px; margin: 0 auto; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
-            AI-Powered Resume Analysis for efficient hiring
-        </p>
+    <div class="header">
+        <h1>🎯 AI Resume Screening Agent</h1>
+        <p>AI-Powered Resume Analysis with Groq API</p>
     </div>
-    
+
     <div class="container">
-
-        {% if error %}
-        <div class="alert alert-error">
-            <strong>❌ Error:</strong> {{ error }}
-        </div>
-        {% endif %}
-
-        <div class="upload-section">
-            <h2>📄 Submit Job Description & Resumes</h2>
-            <form method="POST" enctype="multipart/form-data" action="/upload">
+        <!-- Upload Documents Section -->
+        <div class="card">
+            <h2>📄 Upload Documents</h2>
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="job_description_text">📋 Job Description (Text)</label>
+                    <textarea id="job_description_text" name="job_description_text" placeholder="Paste your job description here..."></textarea>
+                </div>
                 
-                <!-- Job Description Text Area -->
                 <div class="form-group">
-                    <label for="job_description_text">
-                        <span class="label-icon">📋</span>
-                        Job Description
-                    </label>
-                    <p class="help-text">Paste the job description text below or upload a file</p>
-                    <textarea id="job_description_text" 
-                              name="job_description_text" 
-                              rows="10" 
-                              placeholder="Paste job description here...\n\nExample:\nJob Title: Data Science Engineer\nExperience: 3-8 years\nRole Overview: ...\n\nKey Responsibilities: ..."></textarea>
-                    
-                    <p class="help-text" style="margin-top: 15px;">Or upload a file (PDF, DOCX, or TXT)</p>
-                    <div class="file-input-wrapper">
-                        <input type="file" 
-                               id="job_description" 
-                               name="job_description" 
-                               accept=".pdf,.docx,.doc,.txt">
-                        <span class="file-name" id="job-file-name">No file chosen (optional)</span>
-                    </div>
+                    <label for="job_description_file">OR 💼 Job Description File (PDF/DOCX/TXT)</label>
+                    <input type="file" id="job_description_file" name="job_description" accept=".pdf,.docx,.txt">
                 </div>
 
-                <!-- Resume Upload (Multiple) -->
                 <div class="form-group">
-                    <label for="resumes">
-                        <span class="label-icon">📁</span>
-                        Resumes
-                    </label>
-                    <p class="help-text">Upload one or more resume files (PDF, DOCX, or TXT)</p>
-                    <div class="file-input-wrapper">
-                        <input type="file" 
-                               id="resumes" 
-                               name="resumes" 
-                               accept=".pdf,.docx,.doc,.txt"
-                               multiple
-                               required>
-                        <span class="file-name" id="resume-file-name">No files chosen</span>
-                    </div>
+                    <label for="resumes">👥 Resumes (Multiple PDF/DOCX/TXT files)</label>
+                    <input type="file" id="resumes" name="resumes" accept=".pdf,.docx,.txt" multiple required>
                 </div>
 
-                <!-- Submit Button -->
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">
-                        <span class="btn-icon">🚀</span>
-                        Analyze Resumes
-                    </button>
+                <!-- Add top_n numeric input field with min=1 and no max constraint -->
+                <div class="form-group">
+                    <label for="top_n">🎯 Number of Top Candidates to Analyze (min 1):</label>
+                    <input type="number" id="top_n" name="top_n" min="1" value="3" required>
+                    <small>Hybrid search will select the top N most relevant candidates for detailed LLM analysis</small>
                 </div>
+
+                <button type="submit" class="btn btn-primary">📤 Upload Files</button>
             </form>
         </div>
 
-        <div class="info-section">
-            <h3>ℹ️ How It Works</h3>
-            <div class="info-grid">
-                <div class="info-card">
-                    <div class="info-number">1</div>
-                    <h4>Provide Job Details</h4>
-                    <p>Paste job description text or upload a file</p>
+        <!-- Processing Status (Hidden by Default) -->
+        <div id="processingSection" class="card" style="display: none;">
+            <h2>⚙️ Processing</h2>
+            <div id="processingStatus">Uploading and parsing documents...</div>
+        </div>
+
+        <div id="uploadStatus"></div>
+
+        <!-- How It Works Section -->
+        <div class="card">
+            <h2>⚡ How It Works</h2>
+            <div class="features-grid">
+                <div class="feature-box feature-1">
+                    <h3>1. Upload</h3>
+                    <p>Upload job description and candidate resumes in PDF, DOCX, or TXT format</p>
                 </div>
-                <div class="info-card">
-                    <div class="info-number">2</div>
-                    <h4>Upload Resumes</h4>
-                    <p>Upload candidate resume files for analysis</p>
+                <div class="feature-box feature-2">
+                    <h3>2. Analyze</h3>
+                    <p>AI analyzes and ranks candidates based on skills, experience, and qualifications</p>
                 </div>
-                <div class="info-card">
-                    <div class="info-number">3</div>
-                    <h4>Get AI Analysis</h4>
-                    <p>Receive detailed scores, rankings, and recommendations</p>
+                <div class="feature-box feature-3">
+                    <h3>3. Review</h3>
+                    <p>Review detailed scoring, strengths, and areas for improvement for each candidate</p>
                 </div>
             </div>
         </div>
 
-        <div class="features-section">
-            <h3>✨ Features</h3>
-            <ul class="features-list">
-                <li>📊 Comprehensive scoring on skills, experience, and education</li>
-                <li>🏆 Automatic ranking from best to least fit candidates</li>
-                <li>💡 Detailed analysis with strengths and weaknesses</li>
-                <li>🎯 Hiring recommendations for each candidate</li>
-                <li>📁 Support for PDF, DOCX, and TXT file formats</li>
-                <li>🤖 Powered by advanced AI language models</li>
-            </ul>
+        <!-- Provide Job Details Section -->
+        <div class="card">
+            <h2>📋 Provide Job Details</h2>
+            <p>For best results, ensure your job description includes:</p>
+            <div class="mini-features">
+                <div class="mini-feature mini-feature-1">
+                    <span>✅</span>
+                    <span>Required skills and qualifications</span>
+                </div>
+                <div class="mini-feature mini-feature-2">
+                    <span>📈</span>
+                    <span>Preferred experience level</span>
+                </div>
+                <div class="mini-feature mini-feature-3">
+                    <span>💼</span>
+                    <span>Key responsibilities</span>
+                </div>
+                <div class="mini-feature mini-feature-4">
+                    <span>🎓</span>
+                    <span>Necessary certifications or education</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="card">
+            <h2>✨ Key Features</h2>
+            <div class="mini-features">
+                <div class="mini-feature mini-feature-1">
+                    <span>🧠</span>
+                    <span>AI-Powered Analysis</span>
+                </div>
+                <div class="mini-feature mini-feature-2">
+                    <span>⚡</span>
+                    <span>Instant Results</span>
+                </div>
+                <div class="mini-feature mini-feature-3">
+                    <span>📊</span>
+                    <span>Detailed Scoring</span>
+                </div>
+                <div class="mini-feature mini-feature-4">
+                    <span>📤</span>
+                    <span>Export to PDF/Excel</span>
+                </div>
+            </div>
         </div>
 
         <div class="history-link-section">
-            <h3>📚 View Your Screening History</h3>
-            <p>Access your previous resume screenings, export results, and manage your analysis history</p>
-            <a href="/history" class="btn btn-primary">
-                <span class="btn-icon">📚</span>
-                View History
-            </a>
+            <h3>📚 View Previous Screenings</h3>
+            <a href="/history" class="btn btn-secondary">View History</a>
         </div>
+    </div>
 
-        <footer>
-            <p>Powered by <strong>Basappa Vajramatti</strong> | Built with ❤️ for efficient hiring</p>
-        </footer>
+    <div class="footer">
+        <p>Powered by Basappa Vajramatti | Built with ❤️ for efficient hiring</p>
     </div>
 
     <script>
-        // Show selected file names
-        document.getElementById('job_description').addEventListener('change', function(e) {
-            const fileName = e.target.files[0]?.name || 'No file chosen';
-            document.getElementById('job-file-name').textContent = fileName;
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const processingSection = document.getElementById('processingSection');
+            const screeningSection = document.getElementById('screeningSection');
+            const processingStatus = document.getElementById('processingStatus');
+            const topNInput = document.getElementById('top_n');
+            const resumeInput = document.getElementById('resumes');
+            
+            // Validate top_n value
+            const topNValue = parseInt(topNInput.value);
+            const maxResumes = parseInt(topNInput.getAttribute('data-max-resumes')) || resumeInput.files.length;
+            
+            if (topNValue > maxResumes) {
+                alert(`Error: Number of top candidates (${topNValue}) cannot be greater than the number of uploaded resumes (${maxResumes}).`);
+                return;
+            }
+            
+            // Show processing section
+            processingSection.style.display = 'block';
+            this.style.display = 'none';
+            
+            // Update status
+            processingStatus.textContent = 'Uploading and parsing documents...';
+            
+            // Submit form via AJAX
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    // Silently handle error - don't show to user
+                    console.log('Error:', data.error);
+                    processingSection.style.display = 'none';
+                    this.style.display = 'block';
+                    return;
+                }
+                
+                processingStatus.textContent = `Successfully parsed ${data.num_resumes} resumes for position: ${data.job_title}`;
+                
+                // Automatically start screening after a short delay
+                setTimeout(() => {
+                    processingStatus.textContent = `Starting AI-powered screening of top ${data.top_n} candidates...`;
+                    
+                    // Start screening via AJAX with top_n parameter
+                    fetch(`/screen?top_n=${data.top_n}`, {
+                        method: 'POST'
+                    })
+                    .then(response => response.json())
+                    .then(screenData => {
+                        if (screenData.error) {
+                            // Silently handle error - don't show to user
+                            console.log('Error:', screenData.error);
+                            processingSection.style.display = 'none';
+                            document.getElementById('uploadForm').style.display = 'block';
+                            return;
+                        }
+                        
+                        processingStatus.textContent = `Screening completed! ${screenData.num_candidates} candidates analyzed. Top score: ${screenData.top_score}/100`;
+                        
+                        // Redirect to results page after delay
+                        setTimeout(() => {
+                            window.location.href = '/results';
+                        }, 2000);
+                    })
+                    .catch(error => {
+                        // Silently handle error - don't show to user
+                        console.log('Error:', error);
+                        processingSection.style.display = 'none';
+                        document.getElementById('uploadForm').style.display = 'block';
+                    });
+                }, 1500); // Start screening after 1.5 seconds
+            })
+            .catch(error => {
+                // Silently handle error - don't show to user
+                console.log('Error:', error);
+                processingSection.style.display = 'none';
+                this.style.display = 'block';
+            });
         });
-
-        document.getElementById('resumes').addEventListener('change', function(e) {
-            const fileCount = e.target.files.length;
-            const fileName = fileCount === 1 
-                ? e.target.files[0].name 
-                : `${fileCount} files selected`;
-            document.getElementById('resume-file-name').textContent = fileName;
+        
+        // Update validation when resumes are selected
+        document.getElementById('resumes').addEventListener('change', function() {
+            const resumeFiles = this.files;
+            const topNInput = document.getElementById('top_n');
+            
+            if (resumeFiles.length > 0) {
+                // Store the number of resumes in a data attribute
+                topNInput.setAttribute('data-max-resumes', resumeFiles.length);
+                
+                // Ensure minimum value is 1
+                if (parseInt(topNInput.value) < 1) {
+                    topNInput.value = 1;
+                }
+            }
         });
+        
     </script>
 </body>
 </html>

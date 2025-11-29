@@ -127,7 +127,7 @@ Best regards,
             return False
     
     def notify_candidates(self, results: List[Dict], job_title: str, company: str, 
-                         threshold: float = 70.0) -> Dict[str, int]:
+                         threshold: float = 70.0, db_manager=None) -> Dict[str, int]:
         """
         Notify all candidates based on their scores
         
@@ -136,6 +136,7 @@ Best regards,
             job_title: Job title
             company: Company name
             threshold: Score threshold for selection (default: 70.0)
+            db_manager: Database manager instance to retrieve email addresses
             
         Returns:
             Dict with counts of sent emails
@@ -150,7 +151,19 @@ Best regards,
             try:
                 # Extract candidate information
                 candidate_name = result.get("candidate_name", "Candidate")
+                resume_id = result.get("resume_id", "")
+                
+                # Try to get email from the result first
                 candidate_email = result.get("email", "")
+                
+                # If not found and we have a db_manager, try to get it from the database
+                if not candidate_email and db_manager and resume_id:
+                    try:
+                        parsed_resume = db_manager.get_parsed_resume(resume_id)
+                        if parsed_resume:
+                            candidate_email = parsed_resume.get("email", "")
+                    except Exception as e:
+                        print(f"⚠️  Could not retrieve email for {candidate_name} from database: {str(e)}")
                 
                 # Skip if no email provided
                 if not candidate_email:

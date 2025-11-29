@@ -3,539 +3,731 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Screening Results - Resume Screening Agent</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>🏆 Screening Results - Resume Screening Agent</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            position: relative;
+            z-index: 1;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: white;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            margin-bottom: 15px;
+        }
+
+        .header p {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 300;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .summary-section {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .summary-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.4);
+        }
+
+        .summary-section h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ee7752, #e73c7e, #23a6d5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+        }
+
+        .summary-item {
+            text-align: center;
+            padding: 25px;
+            background: linear-gradient(135deg, rgba(238, 119, 82, 0.1), rgba(231, 60, 126, 0.05));
+            border-radius: 16px;
+            border: 2px solid rgba(238, 119, 82, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .summary-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(238, 119, 82, 0.25);
+            border-color: rgba(238, 119, 82, 0.4);
+        }
+
+        .summary-item h3 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .summary-item p {
+            font-size: 1rem;
+            color: #6b7280;
+            font-weight: 600;
+        }
+
+        .candidates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .candidate-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            animation: cardFadeIn 0.6s ease forwards;
+            opacity: 0;
+        }
+
+        @keyframes cardFadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .candidate-card:nth-child(1) { animation-delay: 0.1s; }
+        .candidate-card:nth-child(2) { animation-delay: 0.2s; }
+        .candidate-card:nth-child(3) { animation-delay: 0.3s; }
+        .candidate-card:nth-child(4) { animation-delay: 0.4s; }
+        .candidate-card:nth-child(5) { animation-delay: 0.5s; }
+        .candidate-card:nth-child(6) { animation-delay: 0.6s; }
+
+        .candidate-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25), 0 0 25px rgba(238, 119, 82, 0.15);
+        }
+
+        .candidate-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(229, 231, 235, 0.5);
+            gap: 15px;
+        }
+
+        .candidate-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            flex: 1;
+        }
+
+        .score-badge {
+            background: linear-gradient(135deg, #ee7752 0%, #e73c7e 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(238, 119, 82, 0.4);
+            white-space: nowrap;
+        }
+
+        .scores-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .score-item {
+            background: linear-gradient(135deg, rgba(35, 166, 213, 0.1), rgba(35, 213, 171, 0.05));
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid rgba(35, 166, 213, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .score-item:hover {
+            transform: scale(1.03);
+            border-color: rgba(35, 166, 213, 0.4);
+            box-shadow: 0 4px 15px rgba(35, 166, 213, 0.25);
+        }
+
+        .score-label {
+            display: block;
+            font-size: 0.85rem;
+            color: #6b7280;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .score-value {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .highlights-section {
+            margin-top: 20px;
+        }
+
+        .highlights-section h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 15px;
+        }
+
+        .highlights-content {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .highlight-item {
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            border-left: 4px solid;
+        }
+
+        .highlight-item.positive {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: #10b981;
+            color: #065f46;
+        }
+
+        .highlight-item.negative {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+
+        .highlight-item strong {
+            font-weight: 700;
+        }
+
+        .actions-section {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            margin: 30px 0;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .export-section {
+            text-align: center;
+        }
+
+        .export-section h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ee7752, #e73c7e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ee7752 0%, #e73c7e 50%, #23a6d5 100%);
+            background-size: 200% 200%;
+            animation: gradientSlide 3s ease infinite;
+            color: white;
+        }
+
+        @keyframes gradientSlide {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(238, 119, 82, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #e73c7e 0%, #ee7752 50%, #23d5ab 100%);
+            background-size: 200% 200%;
+            animation: gradientSlide 3s ease infinite;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(231, 60, 126, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #23d5ab 0%, #23a6d5 50%, #ee7752 100%);
+            background-size: 200% 200%;
+            animation: gradientSlide 3s ease infinite;
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(35, 213, 171, 0.4);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .header p {
+                font-size: 1.1rem;
+            }
+            
+            .candidates-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .scores-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .actions-section {
+                padding: 25px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .candidate-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .scores-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .radio-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div style="text-align: center; margin-bottom: 30px; padding: 20px;">
-        <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 15px; letter-spacing: -1px; color: #ffffff; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
-            <span style="background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                🏆 Screening Results
-            </span>
-        </h1>
-        <p style="font-size: 1.2rem; color: #ffffff; font-weight: 400; max-width: 600px; margin: 0 auto; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
-            AI-Powered Resume Analysis Report
-        </p>
+    <div class="header">
+        <h1>🏆 AI-Powered Resume Analysis</h1>
+        <p>Detailed Screening Results</p>
     </div>
-    
-    <div class="container">
 
-        <div class="results-summary">
+    <div class="container">
+        <!-- Analysis Summary -->
+        <div class="summary-section">
             <h2>📊 Analysis Summary</h2>
             <div class="summary-grid">
-                <div class="summary-card">
-                    <div class="summary-icon">📋</div>
-                    <div class="summary-content">
-                        <h3>Job Position</h3>
-                        <p>{{ job_title }}</p>
-                    </div>
+                <div class="summary-item">
+                    <h3>{{ results|length }}</h3>
+                    <p>Candidates Screened</p>
                 </div>
-                <div class="summary-card">
-                    <div class="summary-icon">👥</div>
-                    <div class="summary-content">
-                        <h3>Candidates Analyzed</h3>
-                        <p>{{ results|length }}</p>
-                    </div>
+                <div class="summary-item">
+                    <h3>{{ job_title }}</h3>
+                    <p>Position</p>
                 </div>
-                <div class="summary-card">
-                    <div class="summary-icon">⭐</div>
-                    <div class="summary-content">
-                        <h3>Top Score</h3>
-                        <p>{{ "%.1f"|format(results[0].overall_score) }}/100</p>
-                    </div>
+                <div class="summary-item">
+                    <h3>{% if results %}{{ results[0].overall_score|round(1) }}{% else %}0{% endif %}</h3>
+                    <p>Top Score</p>
+                </div>
+                <div class="summary-item">
+                    <h3>
+                        {% set recommended_count = 0 %}
+                        {% for result in results %}
+                            {% if result.recommendation in ['HIGHLY_RECOMMENDED', 'RECOMMENDED'] %}
+                                {% set recommended_count = recommended_count + 1 %}
+                            {% endif %}
+                        {% endfor %}
+                        {{ recommended_count }}
+                    </h3>
+                    <p>Recommended</p>
                 </div>
             </div>
-            
-            <!-- Email Notification Statistics -->
-            {% if notification_stats %}
-            <div class="notification-stats">
-                <h3>📧 Email Notifications</h3>
-                <div class="stats-grid">
-                    <div class="stat-card success">
-                        <div class="stat-icon">✅</div>
-                        <div class="stat-content">
-                            <h4>Selected Candidates</h4>
-                            <p>{{ notification_stats.selected }}</p>
-                        </div>
-                    </div>
-                    <div class="stat-card warning">
-                        <div class="stat-icon">⚠️</div>
-                        <div class="stat-content">
-                            <h4>Not Selected</h4>
-                            <p>{{ notification_stats.not_selected }}</p>
-                        </div>
-                    </div>
-                    <div class="stat-card info">
-                        <div class="stat-icon">ℹ️</div>
-                        <div class="stat-content">
-                            <h4>Failed Notifications</h4>
-                            <p>{{ notification_stats.failed }}</p>
-                        </div>
-                    </div>
-                </div>
-                <p class="notification-note">Candidates have been notified via email about their application status.</p>
-            </div>
-            {% endif %}
         </div>
 
-        <div class="rankings-section">
-            <h2>🏅 Candidate Rankings</h2>
-            
-            {% for score in results %}
-            <div class="candidate-card rank-{{ loop.index }}">
+        <!-- Candidates Grid -->
+        <div class="candidates-grid">
+            {% for result in results %}
+            <div class="candidate-card">
                 <div class="candidate-header">
-                    <div class="rank-badge">
-                        {% if loop.index == 1 %}
-                            <span class="medal">🥇</span>
-                        {% elif loop.index == 2 %}
-                            <span class="medal">🥈</span>
-                        {% elif loop.index == 3 %}
-                            <span class="medal">🥉</span>
-                        {% else %}
-                            <span class="rank-number">#{{ loop.index }}</span>
-                        {% endif %}
-                    </div>
-                    <div class="candidate-info">
-                        <h3>{{ score.candidate_name }}</h3>
-                        <span class="recommendation recommendation-{{ score.recommendation.lower().replace('_', '-') }}">
-                            {{ score.recommendation.replace('_', ' ') }}
-                        </span>
-                    </div>
-                    <div class="overall-score">
-                        <div class="score-circle">
-                            <span class="score-value">{{ "%.0f"|format(score.overall_score) }}</span>
-                            <span class="score-label">/100</span>
-                        </div>
-                    </div>
+                    <h3>{{ result.candidate_name }}</h3>
+                    <div class="score-badge">{{ result.overall_score|round(1) }}/100</div>
                 </div>
-
-                <div class="score-breakdown">
-                    <div class="score-bar-container">
-                        <div class="score-bar-label">
-                            <span>💼 Skills Match</span>
-                            <span>{{ "%.1f"|format(score.skills_match_score) }}%</span>
+                
+                <div class="candidate-details">
+                    <!-- Scores Grid -->
+                    <div class="scores-grid">
+                        <div class="score-item">
+                            <span class="score-label">Skills</span>
+                            <span class="score-value">{{ result.skills_match_score|round(1) }}</span>
                         </div>
-                        <div class="score-bar">
-                            <div class="score-bar-fill" style="width: {{ score.skills_match_score }}%"></div>
+                        <div class="score-item">
+                            <span class="score-label">Experience</span>
+                            <span class="score-value">{{ result.experience_score|round(1) }}</span>
                         </div>
-                    </div>
-
-                    <div class="score-bar-container">
-                        <div class="score-bar-label">
-                            <span>📈 Experience</span>
-                            <span>{{ "%.1f"|format(score.experience_score) }}%</span>
-                        </div>
-                        <div class="score-bar">
-                            <div class="score-bar-fill" style="width: {{ score.experience_score }}%"></div>
+                        <div class="score-item">
+                            <span class="score-label">Education</span>
+                            <span class="score-value">{{ result.education_score|round(1) }}</span>
                         </div>
                     </div>
 
-                    <div class="score-bar-container">
-                        <div class="score-bar-label">
-                            <span>🎓 Education</span>
-                            <span>{{ "%.1f"|format(score.education_score) }}%</span>
+                    <!-- Key Highlights Only -->
+                    <div class="highlights-section">
+                        <h4>🔍 Key Highlights</h4>
+                        <div class="highlights-content">
+                            <!-- Show only 2 key strengths -->
+                            <div class="highlight-item positive">
+                                <strong>✓ Strength:</strong> 
+                                {% if result.strengths and result.strengths|length > 0 %}
+                                    {{ result.strengths[0] }}
+                                {% else %}
+                                    Not specified
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Show only 2 key weaknesses -->
+                            <div class="highlight-item negative">
+                                <strong>⚠ Area:</strong> 
+                                {% if result.weaknesses and result.weaknesses|length > 0 %}
+                                    {{ result.weaknesses[0] }}
+                                {% else %}
+                                    Not specified
+                                {% endif %}
+                            </div>
                         </div>
-                        <div class="score-bar">
-                            <div class="score-bar-fill" style="width: {{ score.education_score }}%"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="analysis-section">
-                    <h4>📝 Analysis</h4>
-                    <p class="reasoning">{{ score.reasoning }}</p>
-                </div>
-
-                <div class="strengths-weaknesses">
-                    <div class="strengths">
-                        <h4>✅ Strengths</h4>
-                        {% if score.strengths %}
-                        <ul>
-                            {% for strength in score.strengths %}
-                            <li>{{ strength }}</li>
-                            {% endfor %}
-                        </ul>
-                        {% else %}
-                        <p class="no-items">No specific strengths identified</p>
-                        {% endif %}
-                    </div>
-
-                    <div class="weaknesses">
-                        <h4>⚠️ Areas for Improvement</h4>
-                        {% if score.weaknesses %}
-                        <ul>
-                            {% for weakness in score.weaknesses %}
-                            <li>{{ weakness }}</li>
-                            {% endfor %}
-                        </ul>
-                        {% else %}
-                        <p class="no-items">No specific weaknesses identified</p>
-                        {% endif %}
                     </div>
                 </div>
             </div>
             {% endfor %}
         </div>
 
+        <!-- Action Buttons -->
         <div class="actions-section">
-            <div class="actions-row actions-top">
-                <a href="/" class="btn btn-secondary">
-                    <span class="btn-icon">🔄</span>
-                    Analyze More Resumes
-                </a>
-                <a href="/history" class="btn btn-secondary">
-                    <span class="btn-icon">📚</span>
-                    View History
-                </a>
-            </div>
+            <a href="/" class="btn btn-secondary">🔄 Analyze More Resumes</a>
+            <a href="/history" class="btn btn-secondary">📚 View History</a>
             
             {% if session_id %}
-            <!-- Manual Email Sending Section -->
-            <div class="actions-row" style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 10px; border: 1px solid #e2e8f0;">
-                <h3 style="text-align: center; margin-top: 0; color: #333;">📧 Send Email Notifications</h3>
-                <p style="text-align: center; color: #666;">Manually send email notifications to candidates</p>
-                
-                <div style="display: flex; justify-content: center; gap: 15px; margin: 20px 0;">
-                    <button class="btn btn-primary" onclick="showEmailModal()">
-                        <span class="btn-icon">📤</span>
-                        Send Notifications
-                    </button>
-                </div>
-                
-                <!-- Email Stats (if emails were already sent) -->
-                {% if notification_stats %}
-                <div class="notification-stats">
-                    <h4>Previous Notification Results:</h4>
-                    <div class="stats-grid">
-                        <div class="stat-card success">
-                            <div class="stat-icon">✅</div>
-                            <div class="stat-content">
-                                <h4>Sent</h4>
-                                <p>{{ notification_stats.selected + notification_stats.not_selected }}</p>
-                            </div>
-                        </div>
-                        <div class="stat-card info">
-                            <div class="stat-icon">ℹ️</div>
-                            <div class="stat-content">
-                                <h4>Failed</h4>
-                                <p>{{ notification_stats.failed }}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-            </div>
+            <!-- Hidden session ID for JavaScript -->
+            <div id="session-data" data-session-id="{{ session_id }}" style="display: none;"></div>
             
-            <div class="actions-row actions-middle">
-                <div style="display: flex; flex-direction: column; gap: 20px; width: 100%;">
-                    <h3 style="text-align: center; margin: 0; color: #333;">Export Options</h3>
-                    
-                    <!-- Export Top N Section -->
-                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0;">
-                        <h4 style="text-align: center; margin-top: 0; color: #4a5568;">Export Top N Candidates</h4>
-                        <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
-                            <button class="btn btn-outline" onclick="showTopNModal()">
-                                <span class="btn-icon">📄</span>
-                                Export Top N to PDF
-                            </button>
-                        </div>
-                    </div>
-                </div>
+            <div class="export-section">
+                <h3>Export Options</h3>
+                <button class="btn btn-success" onclick="showExportModal()">📤 Export Top N Candidates</button>
             </div>
             {% endif %}
         </div>
 
-        <!-- Top N Export Modal -->
-        <div id="topNModal" class="modal" style="display: none;">
+        <!-- Export Modal -->
+        <div id="exportModal" class="modal" style="display: none;">
             <div class="modal-content">
-                <h3>Export Top N Candidates</h3>
-                <p>Enter how many top candidates to export (max: {{ results|length }}):</p>
-                
-                <div class="input-group">
-                    <label for="topNInput">Number of Candidates:</label>
-                    <input type="number" id="topNInput" min="1" max="{{ results|length }}" value="5" class="number-input">
-                </div>
-                
-                <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: center;">
-                    <button onclick="exportTopN()" class="btn btn-primary">Export</button>
-                    <button onclick="hideTopNModal()" class="btn btn-outline">Cancel</button>
-                </div>
+                <span class="close" onclick="closeExportModal()">&times;</span>
+                <h2>📤 Export Top N Candidates</h2>
+                <form id="exportForm">
+                    <div class="form-group">
+                        <label for="num_candidates">Number of Candidates:</label>
+                        <input type="number" id="num_candidates" name="num_candidates" min="1" max="{{ results|length }}" value="5" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Select Export Format:</label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="format" value="pdf" checked> 📄 PDF
+                            </label>
+                            <label>
+                                <input type="radio" name="format" value="excel"> 📊 Excel
+                            </label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Export</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeExportModal()">Cancel</button>
+                </form>
             </div>
         </div>
-
-        <!-- Email Notification Modal -->
-        <div id="emailModal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <h3>Send Email Notifications</h3>
-                <p>Configure email notifications for candidates:</p>
-                
-                <div class="input-group">
-                    <label for="scoreThreshold">Selection Threshold (%):</label>
-                    <input type="number" id="scoreThreshold" min="0" max="100" value="70" class="number-input">
-                    <small style="color: #666;">Candidates scoring at or above this threshold will be marked as selected</small>
-                </div>
-                
-                <div class="input-group">
-                    <label for="jobTitle">Job Title:</label>
-                    <input type="text" id="jobTitle" value="{{ job_title }}" class="number-input">
-                </div>
-                
-                <div class="input-group">
-                    <label for="companyName">Company Name:</label>
-                    <input type="text" id="companyName" value="Company" class="number-input">
-                </div>
-                
-                <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: center;">
-                    <button onclick="sendEmailNotifications()" class="btn btn-primary">Send Emails</button>
-                    <button onclick="hideEmailModal()" class="btn btn-outline">Cancel</button>
-                </div>
-            </div>
-        </div>
-        
-        <footer>
-            <p>Powered by <strong>Basappa Vajramatti</strong> | Built with ❤️ for efficient hiring</p>
-        </footer>
     </div>
 
-    <style>
-        /* Remove duplicate CSS since it's already in the external file */
-        
-        /* Add active state for export buttons */
-        .btn.active {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        
-        /* Modal styles */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-        
-        .input-group {
-            margin: 20px 0;
-        }
-        
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-        
-        .number-input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-        
-        .number-input:focus {
-            outline: none;
-            border-color: #8b5cf6;
-        }
-        
-        .export-format-options {
-            margin: 20px 0;
-        }
-        
-        .export-format-options h4 {
-            margin-bottom: 15px;
-            text-align: center;
-        }
-        
-        .format-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-        
-        /* Notification Statistics Styles */
-        .notification-stats {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border: 1px solid #e2e8f0;
-        }
-        
-        .notification-stats h3 {
-            text-align: center;
-            margin-top: 0;
-            color: #333;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
-        }
-        
-        .stat-card {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            border-radius: 8px;
-            background: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .stat-card.success {
-            border-left: 4px solid #10b981;
-        }
-        
-        .stat-card.warning {
-            border-left: 4px solid #f59e0b;
-        }
-        
-        .stat-card.info {
-            border-left: 4px solid #3b82f6;
-        }
-        
-        .stat-icon {
-            font-size: 1.5rem;
-            margin-right: 10px;
-        }
-        
-        .stat-content h4 {
-            margin: 0 0 5px 0;
-            font-size: 0.9rem;
-            color: #666;
-        }
-        
-        .stat-content p {
-            margin: 0;
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-        
-        .notification-note {
-            text-align: center;
-            color: #666;
-            font-style: italic;
-            margin: 0;
-        }
-    </style>
+    <div class="footer">
+        <p>Powered by Basappa Vajramatti | Built with ❤️ for efficient hiring</p>
+    </div>
 
     <script>
-        {% if session_id %}
-        const sessionId = {{ session_id }};
-        {% endif %}
+        // Get session ID from hidden element
+        const sessionDataElement = document.getElementById('session-data');
+        const sessionId = sessionDataElement ? parseInt(sessionDataElement.getAttribute('data-session-id')) : null;
         
-        // Default format is PDF
-        const defaultFormat = 'pdf';
-        
-        function showTopNModal() {
-            document.getElementById('topNModal').style.display = 'flex';
-            document.getElementById('topNInput').focus();
+        // Export functionality
+        function showExportModal() {
+            document.getElementById('exportModal').style.display = 'block';
         }
-        
-        function hideTopNModal() {
-            document.getElementById('topNModal').style.display = 'none';
+
+        function closeExportModal() {
+            document.getElementById('exportModal').style.display = 'none';
         }
-        
-        function exportTopN() {
-            const topN = parseInt(document.getElementById('topNInput').value);
-            const maxCandidates = {{ results|length }};
+
+        document.getElementById('exportForm').addEventListener('submit', function(e) {
+            e.preventDefault();
             
-            if (!topN || topN < 1) {
-                alert('Please enter a valid number (minimum 1)');
-                return;
-            }
+            const formData = new FormData(this);
+            const exportData = Object.fromEntries(formData);
             
-            if (topN > maxCandidates) {
-                alert(`You can only export up to ${maxCandidates} candidates (total uploaded)`);
-                return;
-            }
+            // Redirect to export endpoint
+            const url = `/export/${sessionId}/${exportData.format}?top_n=${exportData.num_candidates}`;
+            window.open(url, '_blank');
             
-            {% if session_id %}
-            // Use default format (PDF) for export
-            window.location.href = `/export/${sessionId}/${defaultFormat}?top_n=${topN}`;
-            hideTopNModal();
-            {% endif %}
-        }
-        
-        // Email Notification Functions
-        function showEmailModal() {
-            document.getElementById('emailModal').style.display = 'flex';
-        }
-        
-        function hideEmailModal() {
-            document.getElementById('emailModal').style.display = 'none';
-        }
-        
-        function sendEmailNotifications() {
-            const threshold = document.getElementById('scoreThreshold').value;
-            const jobTitle = document.getElementById('jobTitle').value;
-            const companyName = document.getElementById('companyName').value;
-            
-            if (!jobTitle || !companyName) {
-                alert('Please fill in all fields');
-                return;
-            }
-            
-            // Send request to backend to send emails
-            fetch('/send-emails', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    session_id: sessionId,
-                    threshold: parseFloat(threshold),
-                    job_title: jobTitle,
-                    company_name: companyName
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                hideEmailModal();
-                if (data.success) {
-                    alert(`Emails sent successfully!\nSelected: ${data.stats.selected}\nNot Selected: ${data.stats.not_selected}\nFailed: ${data.stats.failed}`);
-                    // Reload page to show updated stats
-                    location.reload();
-                } else {
-                    alert('Failed to send emails: ' + data.error);
-                }
-            })
-            .catch(error => {
-                hideEmailModal();
-                alert('Error sending emails: ' + error.message);
-            });
-        }
-        
-        // Allow Enter key to export
-        document.addEventListener('DOMContentLoaded', function() {
-            const input = document.getElementById('topNInput');
-            if (input) {
-                input.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        exportTopN();
-                    }
-                });
-            }
+            closeExportModal();
         });
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const exportModal = document.getElementById('exportModal');
+            
+            if (event.target === exportModal) {
+                exportModal.style.display = 'none';
+            }
+        }
     </script>
 </body>
 </html>

@@ -228,26 +228,6 @@ def export_to_excel(session_info, results, top_n=None):
     if top_n:
         results = results[:top_n]
     
-    # Prepare data for Excel
-    data = []
-    for idx, result in enumerate(results, 1):
-        row = {
-            'Rank': idx,
-            'Candidate Name': result.get('candidate_name', 'N/A'),
-            'Overall Score': round(result.get('overall_score', 0), 1),
-            'Skills Match': round(result.get('skills_match_score', 0), 1),
-            'Experience Score': round(result.get('experience_score', 0), 1),
-            'Education Score': round(result.get('education_score', 0), 1),
-            'Recommendation': result.get('recommendation', 'N/A'),
-            'Reasoning': result.get('reasoning', 'N/A'),
-            'Strengths': ', '.join(result.get('strengths', [])),
-            'Weaknesses': ', '.join(result.get('weaknesses', []))
-        }
-        data.append(row)
-    
-    # Create DataFrame
-    df = pd.DataFrame(data)
-    
     # Create Excel writer
     with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
         # Write session info
@@ -260,8 +240,43 @@ def export_to_excel(session_info, results, top_n=None):
         
         session_df.to_excel(writer, sheet_name='Session Info', index=False)
         
+        # Add summary statistics if results exist
+        if results:
+            avg_score = sum(r.get('overall_score', 0) for r in results) / len(results)
+            top_candidate = max(results, key=lambda x: x.get('overall_score', 0))
+            
+            summary_data = [
+                ['Average Score', f"{avg_score:.1f}/100"],
+                ['Top Candidate', top_candidate.get('candidate_name', 'N/A')],
+                ['Top Score', f"{top_candidate.get('overall_score', 0):.1f}/100"]
+            ]
+            
+            summary_df = pd.DataFrame(summary_data, columns=['Metric', 'Value'])
+            summary_df.to_excel(writer, sheet_name='Summary', index=False)
+        
+        # Prepare detailed data for Excel
+        data = []
+        for idx, result in enumerate(results, 1):
+            # Create a detailed row for each candidate
+            row = {
+                'Rank': idx,
+                'Candidate Name': result.get('candidate_name', 'N/A'),
+                'Overall Score': round(result.get('overall_score', 0), 1),
+                'Skills Match Score': round(result.get('skills_match_score', 0), 1),
+                'Experience Score': round(result.get('experience_score', 0), 1),
+                'Education Score': round(result.get('education_score', 0), 1),
+                'Recommendation': result.get('recommendation', 'N/A'),
+                'Analysis': result.get('reasoning', 'N/A'),
+                'Strengths': '; '.join(result.get('strengths', [])),
+                'Areas for Improvement': '; '.join(result.get('weaknesses', []))
+            }
+            data.append(row)
+        
+        # Create DataFrame
+        df = pd.DataFrame(data)
+        
         # Write results
-        df.to_excel(writer, sheet_name='Results', index=False)
+        df.to_excel(writer, sheet_name='Detailed Results', index=False)
         
         # Auto-adjust column widths
         for sheet_name in writer.sheets:

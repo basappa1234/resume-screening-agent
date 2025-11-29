@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Screening Agent - Smart Hiring Made Easy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(26, 41, 128, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #26d0ce;
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, #ee7752 0%, #e73c7e 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(238, 119, 82, 0.4);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(238, 119, 82, 0.6);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 100px 50px 50px;
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .hero-text {
+            animation: fadeInLeft 1s ease;
+        }
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .hero-text h1 {
+            font-size: 4rem;
+            font-weight: 900;
+            color: white;
+            line-height: 1.2;
+            margin-bottom: 30px;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #26d0ce, #ee7752, #e73c7e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-text p {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 40px;
+            line-height: 1.8;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 16px 40px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ee7752 0%, #e73c7e 100%);
+            color: white;
+            box-shadow: 0 10px 30px rgba(238, 119, 82, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(238, 119, 82, 0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .hero-image {
+            animation: fadeInRight 1s ease;
+            position: relative;
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .hero-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 50px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .hero-card h3 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(238, 119, 82, 0.1), rgba(231, 60, 126, 0.05));
+            border-radius: 15px;
+            border: 2px solid rgba(238, 119, 82, 0.2);
+        }
+
+        .stat-item h4 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ee7752, #e73c7e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 5px;
+        }
+
+        .stat-item p {
+            color: #6b7280;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 100px 50px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 80px;
+            animation: fadeInUp 1s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-header h2 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .section-header p {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .features-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.4s ease;
+            animation: fadeInUp 1s ease;
+            animation-fill-mode: both;
+        }
+
+        .feature-card:nth-child(1) { animation-delay: 0.1s; }
+        .feature-card:nth-child(2) { animation-delay: 0.2s; }
+        .feature-card:nth-child(3) { animation-delay: 0.3s; }
+        .feature-card:nth-child(4) { animation-delay: 0.4s; }
+        .feature-card:nth-child(5) { animation-delay: 0.5s; }
+        .feature-card:nth-child(6) { animation-delay: 0.6s; }
+
+        .feature-card:hover {
+            transform: translateY(-15px) scale(1.03);
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .feature-card h3 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+        }
+
+        .feature-card p {
+            color: #6b7280;
+            line-height: 1.8;
+            font-size: 1rem;
+        }
+
+        /* How It Works Section */
+        .how-it-works {
+            padding: 100px 50px;
+        }
+
+        .steps-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .step {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            margin-bottom: 80px;
+            animation: fadeInUp 1s ease;
+        }
+
+        .step:nth-child(even) {
+            direction: rtl;
+        }
+
+        .step:nth-child(even) > * {
+            direction: ltr;
+        }
+
+        .step-number {
+            font-size: 8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ee7752, #e73c7e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            opacity: 0.3;
+            line-height: 1;
+        }
+
+        .step-content {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .step-content h3 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+        }
+
+        .step-content p {
+            color: #6b7280;
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 100px 50px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .cta-container {
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 80px 50px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .cta-container h2 {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 25px;
+        }
+
+        .cta-container p {
+            font-size: 1.3rem;
+            color: #6b7280;
+            margin-bottom: 40px;
+            line-height: 1.8;
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(26, 41, 128, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 60px 50px 30px;
+            color: white;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 50px;
+            margin-bottom: 40px;
+        }
+
+        .footer-section h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .footer-section p,
+        .footer-section a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            line-height: 2;
+            display: block;
+            transition: all 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: #26d0ce;
+            transform: translateX(5px);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            nav {
+                padding: 20px 30px;
+            }
+
+            .nav-links {
+                gap: 20px;
+            }
+
+            .hero-content {
+                grid-template-columns: 1fr;
+                gap: 50px;
+            }
+
+            .hero-text h1 {
+                font-size: 3rem;
+            }
+
+            .step {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .section-header h2 {
+                font-size: 2.5rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero-text h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-text p {
+                font-size: 1.1rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">
+            🎯 AI Resume Screening
+        </div>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#how-it-works">How It Works</a>
+            <a href="#about">About</a>
+            <a href="/upload" class="cta-button">Get Started</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>
+                    Transform Your <span class="gradient-text">Hiring Process</span> with AI
+                </h1>
+                <p>
+                    Leverage cutting-edge AI technology to screen, analyze, and rank candidates in minutes. 
+                    Make data-driven hiring decisions with confidence.
+                </p>
+                <div class="hero-buttons">
+                    <a href="/upload" class="btn btn-primary">
+                        🚀 Start Screening Now
+                    </a>
+                    <a href="#how-it-works" class="btn btn-secondary">
+                        📖 Learn More
+                    </a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="hero-card">
+                    <h3>⚡ Instant Results</h3>
+                    <!-- <p style="color: #6b7280; margin-bottom: 20px;">Screen hundreds of resumes in seconds</p> -->
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <h4>98%</h4>
+                            <p>Accuracy</p>
+                        </div>
+                        <div class="stat-item">
+                            <h4>10x</h4>
+                            <p>Faster</p>
+                        </div>
+                        <div class="stat-item">
+                            <h4>AI Response</h4>
+                            <p>Get faster responses instantly</p>
+                        </div>
+                        <div class="stat-item">
+                            <h4>100+</h4>
+                            <p>Resumes Processed</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="section-header">
+            <h2>✨ Powerful Features</h2>
+            <p>Everything you need for intelligent resume screening</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🧠</div>
+                <h3>AI-Powered Analysis</h3>
+                <p>Advanced machine learning algorithms analyze resumes against job requirements with precision and accuracy.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Lightning Fast</h3>
+                <p>Process hundreds of resumes with faster. Get instant results and detailed candidate rankings.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Detailed Scoring</h3>
+                <p>Comprehensive scoring across skills, experience, and education with strengths and weaknesses breakdown.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h3>Smart Matching</h3>
+                <p>Intelligent hybrid search combines keyword matching with semantic understanding for better results.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📤</div>
+                <h3>Export Results</h3>
+                <p>Download screening results in PDF or Excel format for easy sharing with your hiring team.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📚</div>
+                <h3>History Tracking</h3>
+                <p>Keep track of all your screening sessions with searchable history and quick access to past results.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="how-it-works">
+        <div class="section-header">
+            <h2>🔄 How It Works</h2>
+            <p>Three simple steps to smarter hiring</p>
+        </div>
+        <div class="steps-container">
+            <div class="step">
+                <div class="step-number">01</div>
+                <div class="step-content">
+                    <h3>📄 Upload Documents</h3>
+                    <p>Upload your job description and candidate resumes in PDF, DOCX, or TXT format. Our system supports batch processing of multiple files.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">02</div>
+                <div class="step-content">
+                    <h3>🤖 AI Analysis</h3>
+                    <p>Our advanced AI engine analyzes each resume, matching skills, experience, and qualifications against your job requirements using hybrid search technology.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">03</div>
+                <div class="step-content">
+                    <h3>🏆 Review Results</h3>
+                    <p>Get detailed candidate rankings with comprehensive scoring, strengths, weaknesses, and recommendations. Export results and make informed hiring decisions.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="cta-container">
+            <h2>🚀 Ready to Transform Your Hiring?</h2>
+            <p>Join hundreds of companies using AI to make smarter, faster hiring decisions. Start screening resumes today and discover the perfect candidates for your team.</p>
+            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                <a href="/upload" class="btn btn-primary">
+                    Get Started Free
+                </a>
+                <a href="#features" class="btn btn-secondary">
+                    Explore Features
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="about">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>🎯 AI Resume Screening</h3>
+                <p>Transforming recruitment with artificial intelligence. Make better hiring decisions faster.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <a href="/upload">Get Started</a>
+                <a href="/history">View History</a>
+                <a href="#features">Features</a>
+                <a href="#how-it-works">How It Works</a>
+            </div>
+            <div class="footer-section">
+                <h3>Resources</h3>
+                <a href="#">Documentation</a>
+                <a href="#">API Reference</a>
+                <a href="#">Support</a>
+                <a href="#">Blog</a>
+            </div>
+            <div class="footer-section">
+                <h3>Contact</h3>
+                <a href="#">basappavajramatti53@gmail.com</a>
+                <a href="#">+917899239821</a>
+                <p style="margin-top: 20px;">Built with ❤️ by Basappa Vajramatti</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 AI Resume Screening Agent. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add scroll animation to elements
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = 1;
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe elements with fade-in animation
+        document.querySelectorAll('.feature-card, .step, .section-header').forEach(el => {
+            el.style.opacity = 0;
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

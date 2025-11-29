@@ -1,0 +1,47 @@
+graph TD
+    A[User Interface] --> B[Flask Web Application]
+    B --> C[Resume Screening Agent]
+    C --> D[Groq API]
+    C --> E[Vector Database<br/>FAISS]
+    C --> F[Hybrid Search Engine]
+    B --> G[SQLite Database]
+    B --> H[File Parser]
+    H --> I[PDF Parser]
+    H --> J[DOCX Parser]
+    H --> K[TXT Parser]
+    B --> L[Export Utilities]
+    L --> M[PDF Generator<br/>ReportLab]
+    L --> N[Excel Generator<br/>Pandas]
+    
+    subgraph Frontend
+        A
+    end
+    
+    subgraph Backend
+        B
+        C
+        E
+        F
+        G
+        H
+        I
+        J
+        K
+        L
+        M
+        N
+    end
+    
+    subgraph External Services
+        D
+    end
+    
+    style A fill:#ffe4c4,stroke:#333
+    style B fill:#e6e6fa,stroke:#333
+    style C fill:#98fb98,stroke:#333
+    style D fill:#ff7f7f,stroke:#333
+    style E fill:#87ceeb,stroke:#333
+    style F fill:#dda0dd,stroke:#333
+    style G fill:#f0e68c,stroke:#333
+    style H fill:#ffb6c1,stroke:#333
+    style L fill:#ffa07a,stroke:#333

@@ -71,7 +71,14 @@ class ResumeScreeningAgent:
         
         self.client = Groq(api_key=self.api_key)
         self.model = model
-        self.retriever = ResumeRetriever()  # Initialize our retriever
+        self.retriever = None  # Don't initialize immediately to save memory
+        
+    def _get_retriever(self):
+        """Lazy initialization of retriever to save memory"""
+        if self.retriever is None:
+            from vector_db import ResumeRetriever  # Import only when needed
+            self.retriever = ResumeRetriever()
+        return self.retriever
     
     def _create_screening_prompt(self, resume: Resume, job_desc: JobDescription) -> str:
         """Create a detailed prompt for resume screening"""
@@ -308,8 +315,8 @@ Be thorough, fair, and objective in your analysis. Return ONLY valid JSON."""
                 resume_id_map[resume.id] = resume  # Map ID to original object
             
             # Index all resumes and job description
-            self.retriever.index_resumes(resume_dicts)
-            job_id = self.retriever.index_job_description({
+            self._get_retriever().index_resumes(resume_dicts)
+            job_id = self._get_retriever().index_job_description({
                 'title': job_desc.title,
                 'company': job_desc.company,
                 'required_skills': job_desc.required_skills,
@@ -321,7 +328,7 @@ Be thorough, fair, and objective in your analysis. Return ONLY valid JSON."""
             })
             
             # Retrieve top candidates using hybrid search
-            top_candidates = self.retriever.retrieve_candidates({
+            top_candidates = self._get_retriever().retrieve_candidates({
                 'title': job_desc.title,
                 'company': job_desc.company,
                 'required_skills': job_desc.required_skills,

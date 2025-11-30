@@ -22,12 +22,21 @@ class VectorDatabase:
         Args:
             model_name: Sentence transformer model to use for embeddings
         """
-        self.model = SentenceTransformer(model_name)
-        self.dimension = self.model.get_sentence_embedding_dimension()
+        # Use a lighter model for deployment to reduce memory usage
+        self.model = None  # Don't load immediately
+        self.model_name = model_name
+        self.dimension = 384  # Dimension for all-MiniLM-L6-v2
         self.index = faiss.IndexFlatIP(self.dimension)  # Inner product for cosine similarity
         self.documents = []  # Store document metadata
         self.doc_ids = []    # Store document IDs
         
+    def _load_model(self):
+        """Lazy load the sentence transformer model"""
+        if self.model is None:
+            from sentence_transformers import SentenceTransformer
+            self.model = SentenceTransformer(self.model_name)
+            self.dimension = self.model.get_sentence_embedding_dimension()
+    
     def add_documents(self, documents: List[Dict]) -> None:
         """
         Add documents to the vector database
@@ -35,6 +44,9 @@ class VectorDatabase:
         Args:
             documents: List of document dictionaries with 'id', 'content', and metadata
         """
+        # Load model if not already loaded
+        self._load_model()
+        
         texts = [doc['content'] for doc in documents]
         
         # Generate embeddings
@@ -62,6 +74,9 @@ class VectorDatabase:
         Returns:
             List of (document, similarity_score) tuples
         """
+        # Load model if not already loaded
+        self._load_model()
+        
         # Generate query embedding
         query_embedding = self.model.encode([query])
         faiss.normalize_L2(query_embedding)

@@ -782,6 +782,10 @@ def export_session(session_id, format):
     else:
         return "Invalid format", 400
 
+@app.route('/health')
+def health_check():
+    """Health check endpoint for Render"""
+    return jsonify({'status': 'healthy', 'timestamp': datetime.now().isoformat()}), 200
 
 # Make sure the app is accessible for Vercel
 application = app
@@ -789,7 +793,8 @@ application = app
 if __name__ == '__main__':
     # Get port from environment variable or default to 5000
     port = int(os.environ.get('PORT', 5000))
-    app.run(debug=False, host='0.0.0.0', port=port)
+    print(f"Starting server on port {port}")
+    app.run(debug=False, host='0.0.0.0', port=port, threaded=True)
 
 # Vercel requires this for serverless functions
 app = app
